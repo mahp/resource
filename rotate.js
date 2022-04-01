@@ -1,84 +1,78 @@
-// t,e,n
 "use strict";
 
-// Browser test
-var UA = window.navigator.userAgent.toLowerCase(); // wordContainer
-var ua = navigator.userAgent; // h
-var isMobile = /iphone|nokia|sony|ericsson|mot|samsung|sgh|lg|philips|panasonic|alcatel|lenovo|cldc|midp|wap|mobile/i.test(UA) && !/pc=1/.test(location.search); // u
-var isWeiXin = "micromessenger" == UA.match(/MicroMessenger/i); // p
-var isWeiBo = (UA.match(/WeiBo/i), "newsapp" == UA.match(/newsapp/i)); // m
-var isQQ = "qq" == UA.match(/QQ/i); // g
-var isAndroid = -1 < ua.indexOf("Android") || -1 < ua.indexOf("Adr"); // f
-var isMac = !!ua.match(/\(i[^;]+;( U;)? CPU.+Mac OSstage/); // v
-var isPhoneX = /iphone/gi.test(navigator.userAgent) && (812 == screen.height && 375 == screen.width || 896 == screen.height && screen.width); 
-  
-// getUrl
-function getUrl(t) {
-  return "https://static.ws.126.net/163/f2e/news/one_hundred/static/" + t
-}
+// 设计稿宽度和文字大小
+var designWidth = 750;
+var designFontSize = 30;
 
-// 页面url
-var pageUrl = 'https://www.wangyidadagh.com/163/html/news/one_hundred/index.html'; // _
+// 文字背景图片
+var statusNormal1 = 'img/status_normal-1.png';
+var statusActive1 = 'img/status_active-1.png';
+var statusNormal2 = 'img/status_normal-2.png';
+var statusActive2 = 'img/status_active-2.png';
+var statusNormal3 = 'img/status_normal-3.png';
+var statusActive3 = 'img/status_active-3.png';
 
-var M;
-var winWidth = window.innerWidth;
-var winHeight = window.innerHeight;
+var mainDom = document.getElementById('main').getBoundingClientRect();
+var mainWidth = designWidth;
+var mainHeight = designWidth * mainDom.height / mainDom.width;
+
+// 旋转文字
+var rotateText = ["起风了","魔法满屋","手写的从前","恰似新上人来","春风十里不如你","重返世界尽头的咖啡馆","叶子已拿定绿色的主意","万物之生","好想去你的世界爱你","不要忘记我爱你","穿过寒冬","以年为单位的恋爱","我们的滚烫人生","天赐的声音","陪你一起好好吃饭","大约是爱","假日暖洋洋","勇往直前的我们","怦然心动","春日迟迟再出发","你好星期六","留白是表白","半岛铁盒","如你所想","从不打烊的太阳","一个人喜欢一个人","我不想如往常一样","超越无界","遇见你的那一天","不完美的秘密","反方向的钟","说了再见","修炼爱情","我是如此相信","一样的月光","明明就","后来的我们","一路向北","倒叙的生活","脱胎换骨","你是我的春天","睡个好觉","想看你笑的样子","与君初相识","抱住棒棒的自己","不要挑战人性","我是人间自在客","人间可爱","生有热烈藏与俗常","愿你温柔且坚可攻亦可守","在冬天感谢夏天","我想为你种棵树","外面真好","日日有好事","热闹人间半满生活","地球上最孤独的动物","一只猫的存在主义思考","当下即是生活","拉下百叶窗的午后","去乡下盖间房子","随风去野","那是一道心上的彩虹","相逢时节","你是我的荣耀","余生请多指教","人生海海","你是我的小确幸","救赎之路","被尘封的故事","飞向月球","最终幻想","失落城堡","英雄就是我","余烬风暴","山海镜花","夜之归途","点燃火炬","混沌银河","螺旋圆舞曲","万象物语","胭脂用尽时，桃花就开了","狂跳的心搅乱水中的浮云","沉在夜里 静而黑暗","春天是没有国籍的","东风掠过我脸边","趁春风不注意抓一束回家","如期而至的快乐","春天是发呆的季节","白云是世界的公民","像冒泡的汽水","黄昏的落日","草木蔓发，春山可望","雪化了是什么","夕阳会逃跑","除了春天禁止入内","早春不过一棵树","循环好心情","遇事不决可问春","风里夹着温柔","我与春风撞了个满怀","永远不要失去发芽的心情","爱的人正在路上","和春天交换秘密","你来的那天春天也来到","我抱着一个落日","用一场春雨来告别冬天","太阳很好，要你亲自去晒","把暖暖的阳光藏进被窝"];
+
 var Container = PIXI.Container;
-var Loader = (PIXI.autoDetectRenderer, PIXI.loader); // I
+var Loader = PIXI.loader;
 var Resources = PIXI.loader.resources;
-var Sprite = (PIXI.Texture, PIXI.Text, PIXI.Sprite); // N
-var CanvasRenderer = new PIXI.CanvasRenderer(window.innerWidth, window.innerHeight, {
-    backgroundColor: 16711673,
+var Sprite = PIXI.Sprite;
+var CanvasRenderer = new PIXI.CanvasRenderer(mainWidth, mainHeight, {
+    transparent: true,
     antialias: true,
     resolution: 1
   })
 var Stage = new PIXI.Container;
 
-var circles = getUrl("circles4.json"); // L: 点击弹出的气泡图片sprite
-var slide = getUrl("slide2.json"); // w: 左右滑动提示图片sprite
-// 旋转文字：共100句，最短3个字，最长14个字
-var rotateText = ["看极光", "一次无计划的旅程", "勇敢告白一次", "写信给未来的自己", "去爱豆的演唱会", "看完1000部电影", "毫无顾忌地大醉一场", "潜水", "认真道别一次", "完整地看一次日出/日落", "拿到驾照", "开一家店（网店也算）", "拥有一个死党", "经济独立", "会一种乐器", "拍一次全家福", "打卡书籍/影视中的经典地标", "得一次第一名", "献血", "看完1000本书", "拥有自己的房子", "（曾经/正在）和宠物一同生活", "遇到过令你心动的人", "高空跳伞", "创业（无论成败）", "有一道拿手好菜", "一个人去旅行", "拥有马甲线/腹肌", "与网友成为现实中的朋友", "上一次电视", "看一场流星雨", "去世界级赛事现场", "和喜欢的人用同一个耳机听歌", "为梦想疯狂一次", "种一棵树（含蚂蚁森林）", "培养一个兴趣爱好", "去喜欢的国家生活一段时间", "保存着一份孩子气", "拥有10年以上的挚友", "写一本书", "做爱心志愿者", "完成制订的减肥/健身计划", "去西藏", "作为选手参加一次大型赛事", "对家人说我爱你", "去一次音乐节", "见证自己的蜕变", "精通一门外语", "把房子装饰成喜欢的样子", "随手帮助陌生人", "定期存钱（金额不限）", "毕业旅行", "登记器官/遗体捐献", "用第一笔工资给家人买礼物", "体验乡间生活", "亲手种出食物并吃掉", "学会一支舞", "看一场灿烂的烟火", "邀请亲友参加自己的毕业典礼", "近距离接触偶像", "和喜欢的人恋爱", "观鲸", "在星空下露营", "在到过的地方寄明信片给自己 ", "拿一次奖学金", "实现家人的心愿", "珍藏一件凝聚情感的物品", "结识不同国籍的朋友", "发表一次演讲", "拥有一段刻骨铭心的爱情", "对伴侣认真说一次我爱你", "陪家人去旅行", "冲洗重要的照片，整理成相册", "赚到人生的第一个100万", "记录生活（含社交平台）", "拍一次写真", "见证好朋友的婚礼", "拍幼时和长大的对比照", "组一支乐队", "试着原谅一个人", "重回童年居住的地方", "去中国各省市打卡", "带父母重拍婚纱照", "送自己一个贵到模糊的礼物", "谈一场校园恋爱", "带家人体检", "打卡七大洲", "拜访恩师", "去不同的城市生活", "当爸爸/妈妈", "定期自我总结", "将一个浪漫的想法变成现实", "和伴侣一起看鬼片", "立一份遗嘱", "和愧对的人道歉", "学会理财", "参加大型的倒计时跨年", "与朋友彻夜谈心", "接纳自己，与自己和解", "学会断舍离"];
-
 var circleHeight // 圆环可滚动区域高度
 var circleNumber // 圆环最大圈数值
-var ct = 300 // 300 半径 = 屏幕高度 + 这个高度
-var lt = 450 // 450 内半径，底部距离
-var dt = 150 // 150 外半径，顶部距离
-var ut = 80 // 80 圆环间距？
-var ht = [] // ?
+var circleCenterY = 200 // 圆心的y坐标 = mainHeight + circleCenterY，越大看起来越不弯
+var innerRadius = 700 // 内半径，距离圆心距离
+var outerDistance = 170 // 外半径，距离顶部距离，影响圈数
+var circleGap = 80 // 圆环之间的间距，越小，圈数越多，文字行距越小
+var textDensity = 360 // 文字密集度，及同一圆环文字之间的间隔，越大越密
+var circleNumberArray = [] // 圆环圈数随机数组
 var cacheChosen = [] // 已经缓存的点击选择的圆形图片和文字图片，方便生成海报
-var mt = 0.3 // ?
-var vt = false // ?
-var wt = false // ?
-var _t = -1.8 // ?
-var speed = 0.001 // 滚动速度 0.001
+var touching = false // 触摸过程中
+var going = false // 滚动中
+var mt = 0.3 // 开始滚动的左边位置
+var _t = -1.8 // 加速度
+var speed = 0.001 // 自动滚动速度 0.001
+var textRandomShow = true // 随机显示，因文字长短不一，有可能不太好
 
 // 滚动代理
 var scrollDistance = 0; // 滚动距离
 var scrollStart = 5000; // 滚动位置
-var scrollerObj = scrollerObj = new Scroller(function (left, top, zoom) {
+var scrollerObj = new Scroller(function (left, top, zoom) {
   scrollDistance = left - scrollStart
   scrollStart = left
-  if (!vt && wt) {
+  if (!touching && going) {
     if (_t > -1.8) {
       _t = -1.8
+      going = false
+      scrollerObj.scrollTo(50000, 0, false);
       return 
     }
-    wt = false
-    void scrollerObj.scrollTo(50000, 0, false);
     if (Math.abs(scrollDistance) < 1) {
-      wt = false
+      going = false
       scrollerObj.scrollTo(50000, 0, false);
     } else {
       _t -= scrollDistance / 1000 * 1.5
     }
   }
-  if (vt) {
+  if (touching) {
     _t -= scrollDistance / 1000 * 1.5
     if (_t > -1.8) {
       _t = -1.8
     }
   }
+
 }, {
   zooming: false,
   animating: true,
@@ -94,71 +88,73 @@ var rotateStart = false // 选择是否开始
 // canvas appendTo #main
 document.getElementById("main").append(CanvasRenderer.view);
 
-// load后，加载资源
+// load后加载资源
 window.onload = function () {
-  Loader.add(circles).add(slide).on("progress", function(t, e) {
+  Loader
+  .add(statusNormal1).add(statusActive1)
+  .add(statusNormal2).add(statusActive2)
+  .add(statusNormal3).add(statusActive3)
+  .load(init);
+  Loader.onProgress.add((t, e) => {
     console.log('loader progress:', parseInt(t.progress));
-  }).load(init);
+  });
 };
 
-// 加载资源后初始化
-function init() {
-  winWidth = window.innerWidth, 
-  winHeight = window.innerHeight, 
+// 加载资源完成后初始化
+function init(loader, resources) {
   // 滚动代理容器
   scrollContainer = new PIXI.Container;
-  var t = createRectangle({
-    color: 15790320,
-    width: 750,
-    height: winHeight,
+  var rectGraphic = createRectangle({
+    alpha: 0,
+    width: mainWidth,
+    height: mainHeight,
     x: 0,
     y: 0
   });
-  scrollContainer.addChild(t)
+  scrollContainer.addChild(rectGraphic)
+
   scrollContainer.interactive = true
   scrollContainer.buttonMode = true
-  scrollContainer.on("touchstart", touchstart)
-    .on("touchmove", touchmove)
-    .on("touchend", touchend)
-    .on("tap", function () {
-      // if ($(".select_main").hasClass("show")) {
-      //   speed = 0.001
-      //   $(".select_main").removeClass("show")
-      //   $(".num_rect").hide()
-      // }
-  }), 
-  scrollerObj.setDimensions(750, winHeight, 100000, winHeight) // clientWidth, clientHeight, contentWidth, contentHeight
+  scrollContainer.on("touchstart", touchstart).on("touchmove", touchmove).on("touchend", touchend); 
+  scrollerObj.setDimensions(mainWidth, mainHeight, 100000, mainHeight);
   scrollerObj.scrollTo(50000, 0, false)
   Stage.addChild(scrollContainer)
+  // TODO: 缩小看下整体
+  // scrollContainer.position.x = 200;
+  // scrollContainer.scale.set(0.4, 0.4);
+
   CanvasRenderer.render(Stage)
 
-  // 1: ready
   textWrapContainer = new PIXI.Container;
   textContainer = new PIXI.Container;
 
-  // TODO: 圆环路数，依据屏幕的高度1-9圈?
+  // 圆环路数，依据屏幕的高度1-n圈
   (function _what() {
-    circleHeight = winHeight - dt - lt; // 1334-150-450=734
-    circleNumber = Math.floor(circleHeight / (30 + ut)); // 30+80
-    // 偶数
+    circleHeight = mainHeight - outerDistance - innerRadius; // 圆饼
+    circleNumber = Math.floor(circleHeight / circleGap); // 圆环数
+    console.log('circleNumber:', circleNumber);
+    // 偶数数组
     var t = []
     for (var e = 0; e <= circleNumber / 2; e++) {
-      t.push(2 * e); // t: [0,2,4,6]
+      t.push(2 * e); // [0,2,4,6]
     }
-    // 奇数
+    // 奇数数组
     var n = []; // [1,3,5]
     for (e = 0; e < circleNumber / 2; e++) {
       n.push(2 * e + 1);
     }
-    for (var i = 0; i < 40; i++) {
+    // 确保数组总数包含所有的文字数量
+    for (var i = 0; i < Math.ceil(rotateText.length / 2); i++) {
       var a;
       if (i % 2 == 0) {
         a = JSON.parse(JSON.stringify(t));
       } else {
         a = JSON.parse(JSON.stringify(n));
       }
-      a = a.sort(randomValue).sort(randomValue)
-      ht = ht.concat(a) // 140-200个随机数
+      if (textRandomShow) {
+        a = a.sort(randomValue).sort(randomValue) // 随机排序，显示顺序
+      }
+      circleNumberArray = circleNumberArray.concat(a) // 偶数和奇数相隔的随机数数组
     }
   })();
 
@@ -168,9 +164,8 @@ function init() {
     handleText(textIndex);
     CanvasRenderer.render(Stage);
     ++textIndex;
-    if (textIndex == 100) {
+    if (textIndex == rotateText.length) {
       clearInterval(textInterval);
-      handleText(101); // 101个是干嘛？
     }
   }, 10);
 
@@ -179,8 +174,6 @@ function init() {
   // 添加到滑动容器
   scrollContainer.addChild(textWrapContainer);
 
-  // 2: go
-  // 隐藏loading
   // 启动raf
   animate();
 
@@ -192,7 +185,7 @@ function init() {
 function touchstart(t) {
   var e = t.data.originalEvent;
   scrollerObj.doTouchStart(e.touches, e.timeStamp);
-  wt = vt = true
+  going = touching = true
 }
 
 // 触摸移动
@@ -203,161 +196,140 @@ function touchmove(t) {
 
 // 触摸结束
 function touchend(t) {
-  vt = false;
+  touching = false;
   var e = t.data.originalEvent;
   scrollerObj.doTouchEnd(e.timeStamp);
 }
 
-// TODO: 关键方法：遍历文字，形成圆形 s
+// 关键方法：遍历文字，形成圆形
 function handleText(textIndex) {
   var finishText; // 最后的文字
-  var text = rotateText[textIndex]; // 文字 e
-  text = (textIndex + 1) + "." + text; // 加上数字编号
+  var text = rotateText[textIndex]; // 文字
 
   var innerContainer = new Container; // 总的一个容器
-  innerContainer.textData = rotateText[textIndex]
-  innerContainer.index = textIndex
-  innerContainer.gameStep = 0 // ?
-  innerContainer.rotation = Math.PI / 2;
+  innerContainer.textData = rotateText[textIndex] // 保存文字信息
+  innerContainer.index = textIndex // 保存文字索引
+  innerContainer.gameStep = 0 //
+  // innerContainer.rotation = Math.PI / 2; // 旋转的角度
 
-  var n = innerContainer.roadIndex = ht[textIndex] // 圆环路数0-9之一，依据屏幕高度
-  var i = 30 + ut // 30+80
-  var a = ct + lt + n * i - ut + i
+  innerContainer.roadIndex = circleNumberArray[textIndex] // 圆环路数
+  var n = innerContainer.roadIndex // 和
+  var a = circleCenterY + innerRadius + n * circleGap; // 半径 = 圆心 + 内半径 + 间隔
   var r = {
-    x: 375,
-    y: winHeight + ct
-  };
+    x: mainWidth / 2,
+    y: mainHeight + circleCenterY
+  }; // innerContainer位置
 
   innerContainer.speed = 1;
-  innerContainer.position.set(r.x, r.y);
-  innerContainer.pivot.set(0, a);
+  innerContainer.position.set(r.x, r.y); // 放圆心位置
+  innerContainer.pivot.set(0, a); // 移动到旋转点（圈线）
 
-  var c = Math.asin(32 / a); // 角度?
-  var l = 0;
+  var c = Math.asin(designFontSize / a); // 文字之间的紧凑度，文字大小宽度
+  var l = 0; // 弧度
+  var wordContainer = innerContainer.wordBox = new Container;
 
-  // 遍历完成文字后
-  if (textIndex == 101) {
-    text = "你已经看完100件事咯~"
-    finishText = "接下来，从头开始浏览"
-    a = ct + winHeight / 2 + 100
-    r = {
-      x: 375,
-      y: winHeight + ct
-    }
-    innerContainer.position.set(r.x, r.y)
-    innerContainer.pivot.set(0, a)
-    c = Math.asin(32 / a)
-  }
-
-  for (var wordContainer = innerContainer.wordBox = new Container, h = 0; h < text.length; h++) {
-    var u = new Container;
-    var p = new PIXI.Text(text[h], {
-      fontSize: 30,
+  // 每个字符生成旋转
+  for (var h = 0; h < text.length; h++) {
+    var letterContainer = new Container;
+    var letter = new PIXI.Text(text[h], {
+      fontSize: designFontSize,
       fill: ["#000000"]
     });
-    var m = text.charCodeAt(h);
+    var charCode = text.charCodeAt(h);
     var g = 0;
 
-    g = 0 == h ? 0 : 1 == h && textIndex <= 100 ? .6 * c : 1 <= m && m <= 126 || 65376 <= m && m <= 65439 ? "/" == text[h] ? 1.5 * c : innerContainer.wordBox.children[h - 1].wordStep == c ? 1.2 * c : .6 * c : innerContainer.wordBox.children[h - 1].wordStep == .6 * c || innerContainer.wordBox.children[h - 1].wordStep == 1.5 * c ? .8 * c : c, l += u.wordStep = g, u.rotation = l, u.startRotation = l, u.pivot.set(14, a), u.position.set(14, a);
+    if (h == 0) {
+      g = 0;
+    } else {
+      if (1 <= charCode && charCode <= 126 || 65376 <= charCode && charCode <= 65439) {
+        if ("/" == text[h]) {
+          g = c * 1.5;
+        } else {
+          if (innerContainer.wordBox.children[h - 1].wordStep == c) {
+            g = c * 1.2;
+          } else {
+            g = 0.6 * c;
+          }
+        } 
+      } else {
+        if (innerContainer.wordBox.children[h - 1].wordStep == .6 * c || innerContainer.wordBox.children[h - 1].wordStep == 1.5 * c) {
+          g = 0.8 * c;
+        } else {
+          g = c;
+        }
+      }
+    } 
+    
+    letterContainer.wordStep = g
+    l += letterContainer.wordStep
+    letterContainer.rotation = l
+    letterContainer.startRotation = l
+    letterContainer.pivot.set(0, a)
+    letterContainer.position.set(0, a)
 
-    var f = createRectangle({
-      color: 15790320,
-      width: 38,
-      height: 70,
+    var letterRectangle = createRectangle({
+      color: 0x00ff00,
+      width: designFontSize, // 适配文字宽高
+      height: designFontSize,
       x: 0,
-      y: -20
+      y: 0
     });
-    f.alpha = 0
-    u.addChild(f, p)
+    letterRectangle.alpha = 0;
+    letterContainer.zIndex = 2;
+    letterContainer.addChild(letterRectangle, letter)
     wordContainer.allRotation = l
-    wordContainer.addChild(u)
-  }
-
-  // 超过100，结束时
-  if (101 == textIndex) {
-    var wordContainer2 = innerContainer.wordBox2 = new Container;
-    l -= innerContainer.wordBox.allRotation + .02;
-    for (var w = 0; w < finishText.length; w++) {
-      var _;
-      var x = new Container
-      var b = new PIXI.Text(finishText[w], {
-        fontSize: 30,
-        fill: ["#000000"]
-      });
-      text.charCodeAt(w);
-      _ = c
-      l += x.wordStep = _
-      x.rotation = l
-      x.startRotation = l
-      x.pivot.set(14, a)
-      x.position.set(14, a + 50);
-      var S = createRectangle({
-        color: 15790320,
-        width: 38,
-        height: 70,
-        x: 0,
-        y: -20
-      });
-      S.alpha = 0
-      x.addChild(S, b)
-      wordContainer2.addChild(x)
-    }
-    innerContainer.addChild(wordContainer2)
-  }
-
-  innerContainer.addChild(wordContainer);
-  innerContainer.allRotation = l;
-  mt += 1 / 12;
-  innerContainer.startStemp = mt;
-  textContainer.addChild(innerContainer);
-  if (textIndex == 101) {
-    mt += .6
-    innerContainer.startStemp = mt
-    void(mt += 1 / 3)
-    return
+    wordContainer.addChild(letterContainer)
   }
   
-  // 大于1
+  // 添加文字背景，需要根据文字长度，使用不同的背景图片
+  if (textIndex <= rotateText.length) {
+    var textLength = text.length;
+    var normalTexture = text <= 4 ? statusNormal1 : text > 9 ? statusNormal3 : statusNormal2;
+    var activeTexture = text <= 4 ? statusActive1 : text > 9 ? statusActive3 : statusActive2;
+    var normalSprite = new Sprite(Resources[normalTexture].texture);
+    var activeSprite = new Sprite(Resources[activeTexture].texture);
+    normalSprite.width = wordContainer.width + designFontSize;
+    activeSprite.width = wordContainer.width + designFontSize;
+    normalSprite.x = -designFontSize / 2;
+    activeSprite.x = -designFontSize / 2;
+    normalSprite.y = -designFontSize / 3;
+    activeSprite.y = -designFontSize / 3;
+    normalSprite.rotation = l / 4;
+    activeSprite.rotation = l / 4;
+    activeSprite.visible = false;
+    wordContainer.addChild(normalSprite);
+    wordContainer.addChild(activeSprite);
+    wordContainer.setChildIndex(normalSprite, 0);
+    wordContainer.setChildIndex(activeSprite, 0);
+  }
+
+  wordContainer.pivot.x = wordContainer.width / 2; // pivot center
+  innerContainer.addChild(wordContainer);
+  innerContainer.pivot.x = -innerContainer.width / 2; // pivot center
+  innerContainer.allRotation = l;
+  mt += 1 / textDensity;
+  innerContainer.startStemp = mt;
+  textContainer.addChild(innerContainer);
+  
+  // 大于1时，计算语句之间的间距，防止重叠
   if (textIndex > 0) {
-    if (Math.abs(ht[textIndex - 2] - ht[textIndex]) <= 1) {
+    if (Math.abs(circleNumberArray[textIndex - 2] - circleNumberArray[textIndex]) <= 1) {
       var C = innerContainer.startStemp + innerContainer.allRotation / 2 - textContainer.children[textIndex - 2].startStemp - textContainer.children[textIndex - 2].allRotation / 2;
       C < .1 && (mt += C < 0 ? .25 - C : .25 + C, innerContainer.startStemp = mt)
     }
-    if (Math.abs(ht[textIndex - 1] - ht[textIndex]) <= 1) {
+    if (Math.abs(circleNumberArray[textIndex - 1] - circleNumberArray[textIndex]) <= 1) {
       var T = innerContainer.startStemp + innerContainer.allRotation / 2 - textContainer.children[textIndex - 1].startStemp - textContainer.children[textIndex - 1].allRotation / 2;
-      T < 0 && (mt += 1 / 8 - T, innerContainer.startStemp = mt)
+      T < 0 && (mt += 1 / 12 - T, innerContainer.startStemp = mt)
     }
-    Math.abs(ht[textIndex - 1] - ht[textIndex]) <= 2 && (mt += 1 / 8, innerContainer.startStemp = mt);
+    Math.abs(circleNumberArray[textIndex - 1] - circleNumberArray[textIndex]) <= 2 && (mt += 1 / 8, innerContainer.startStemp = mt);
     for (var y = textIndex - 1; 0 <= y; y--)
-      if (ht[y] == ht[textIndex]) {
+      if (circleNumberArray[y] == circleNumberArray[textIndex]) {
         var E = textContainer.children[textIndex].startStemp - textContainer.children[y].startStemp - textContainer.children[y].allRotation;
         E < 0 ? (mt += 1 / 12 - E, innerContainer.startStemp = mt) : E < .2 && (mt += 1 / 12, innerContainer.startStemp = mt);
         break
       }
   }
-
-  // 圆形container：包括背景和图片
-  var circleSprite = innerContainer.circle = new Container;
-  circleSprite.visible = false;
-
-  // 圆形图片sprite
-  var circleImgSprite = new Sprite(Resources[circles].textures[textIndex + 1 + ".png"]);
-  circleImgSprite.pivot.set(circleImgSprite.width / 2, circleImgSprite.height / 2);
-  circleImgSprite.position.set(circleImgSprite.width / 2, circleImgSprite.height / 2);
-
-  // 圆形背景sprite
-  var circleBgSprite = new Sprite(Resources[circles].textures["bg.png"]);
-  circleBgSprite.visible = false;
-  circleBgSprite.position.set(circleImgSprite.width / 2 - 5, circleImgSprite.height / 2 + 9); // 造投影
-  circleBgSprite.pivot.set(circleImgSprite.width / 2, circleImgSprite.height / 2);
-
-  // 添加到圆形container
-  circleSprite.addChild(circleBgSprite, circleImgSprite);
-  circleSprite.pivot.set(circleImgSprite.width / 2, circleImgSprite.height / 2 + a);
-  circleSprite.position.set(5, a);
-  circleSprite.rotation = l / 2; // ?
   
-  innerContainer.addChild(circleSprite);
   innerContainer.chosen = false;
   innerContainer.interactive = true;
   innerContainer.buttonMode = true;
@@ -373,47 +345,29 @@ function handleText(textIndex) {
     }
   }).on("touchend", function (t) {
     if (innerContainer.touch) {
-      if (innerContainer.xValue <= 30) {
+      if (innerContainer.xValue <= designFontSize) {
         innerContainer.tween1 && innerContainer.tween1.stop()
         innerContainer.tween2 && innerContainer.tween2.stop()
         if (innerContainer.chosen) {
-          innerContainer.hideCircle()
+          innerContainer.hideBackground()
         } else {
-          innerContainer.showCircle()
+          innerContainer.showBackground()
           // 播放点击文字声音
-          // $("#text")[0].currentTime = 0
-          // $("#text")[0].play() 
         }
       }
     }
   })
 
-  // 显示圆形
-  innerContainer.showCircle = function () {
+  // 显示选中背景
+  innerContainer.showBackground = function () {
 
     innerContainer.chosen = true
 
-    // 主要为了缓存的目的，方便生成海报
-    var exist = false; // 是否已经存在
-    cacheChosen.forEach(function (t) {
-      if (t == textIndex) {
-        exist = true
-      }
-    })
-    // 缓存圆形图片和文字图片，生成海报用
-    if (!exist) {
-      var cacheImage = document.createElement("img");
-      cacheImage.src = getUrl("end_circle2/" + (textIndex + 1) + ".png")
-      document.getElementById("loading_img").appendChild(cacheImage);
-      var cacheText = document.createElement("img");
-      cacheText.src = getUrl("end_text2/" + (textIndex + 1) + ".png")
-      document.getElementById("loading_img").appendChild(cacheText)
-      cacheChosen.push(textIndex)
-    }
+    activeSprite.visible = true // 显示圆形容器
+    normalSprite.visible = false // 隐藏默认背景
+    wordContainer.scale.set(0); // 圆形图片缩小为0
 
-    circleSprite.visible = true // 显示圆形容器
-    innerContainer.wordBox.visible = false // 隐藏文字
-    circleImgSprite.scale.set(0); // 圆形图片缩小为0
+    console.log('show:', innerContainer.roadIndex, innerContainer.textData, innerContainer);
     
     // 圆形显示动画
     var i = innerContainer.tween1 = new TWEEN.Tween({
@@ -421,48 +375,47 @@ function handleText(textIndex) {
       }).to({
         scale: 1.2
       }, 200).onUpdate(function (t, e) {
-        circleImgSprite.scale.set(t.scale)
+        wordContainer.scale.set(t.scale)
       }).start();
     var a = innerContainer.tween2 = new TWEEN.Tween({
         scale: 1.2
       }).to({
         scale: 1
       }, 100).onUpdate(function (t, e) {
-        circleImgSprite.scale.set(t.scale)
-        circleBgSprite.scale.set(e)
+        wordContainer.scale.set(t.scale)
       }).onStart(function () {
-        circleBgSprite.visible = true
+        activeSprite.visible = true
       });
     i.chain(a) // 动画序列
 
-    // $(".toEnd_btn").show() // 显示确认选择按钮
   }
   
-  // 隐藏圆形
-  innerContainer.hideCircle = function () {
+  // 隐藏选中背景
+  innerContainer.hideBackground = function () {
 
-    innerContainer.chosen = false
+    innerContainer.chosen = false;
+
+    console.log('hide:', innerContainer.roadIndex, innerContainer.textData, innerContainer);
 
     var t = innerContainer.tween2 = new TWEEN.Tween({
-      scale: 1.2
+      scale: 1.3
     }).to({
-      scale: 0
+      scale: 1
     }, 200).onUpdate(function (t, e) {
-      circleImgSprite.scale.set(t.scale)
+      wordContainer.scale.set(t.scale)
     }).onComplete(function () {
-      circleSprite.visible = false
-      innerContainer.wordBox.visible = true // 显示文字
+      activeSprite.visible = false
+      normalSprite.visible = true
     });
 
     (innerContainer.tween1 = new TWEEN.Tween({
       scale: 1
     }).to({
-      scale: 1.2
+      scale: 1.3
     }, 100).onUpdate(function (t, e) {
-      circleImgSprite.scale.set(t.scale)
-      circleBgSprite.scale.set(1 - e)
+      wordContainer.scale.set(t.scale)
     }).onComplete(function () {
-      circleBgSprite.visible = false
+      activeSprite.visible = false
     }).start()).chain(t)
 
   }
@@ -472,7 +425,7 @@ function handleText(textIndex) {
 // 创建矩形
 function createRectangle(opts) {
   var rect = new PIXI.Graphics();
-  rect.beginFill(opts.color);
+  rect.beginFill(opts.color, typeof opts.alpha !== 'undefined' ? opts.alpha : 1);
   rect.drawRect(0, 0, opts.width, opts.height);
   rect.position.set(opts.x ? opts.x : 0, opts.y ? opts.y : 0);
   rect.endFill();
@@ -481,34 +434,30 @@ function createRectangle(opts) {
 
 // 随机值: 取-1或1
 function randomValue() {
-  return .5 < Math.random() ? -1 : 1
+  return 0.5 < Math.random() ? -1 : 1
 }
 
-// TODO: 动画循环
+// 动画循环
 function animate() {
-  if (rotateStart) {
-    if (textContainer) {
-      if (!wt) {
-        _t -= speed;
-      }
-      textContainer.children.forEach(function (t, e) {
-        var n;
-        if (- _t >= t.gameStep * mt + t.startStemp + mt / 2) {
-          t.gameStep += 1 
-        } else if (-_t < t.gameStep * mt + t.startStemp - mt / 2 && 0 < t.gameStep) {
-          t.gameStep -= 1
-        }
-        if ((n = _t + t.gameStep * mt) <= -t.startStemp && n + t.startStemp > -Math.PI - t.allRotation) {
-          t.rotation = Math.PI / 2 + (n + t.startStemp)
-        } else {
-          if (n + t.startStemp <= -Math.PI - t.allRotation) {
-            t.rotation = -Math.PI - t.allRotation
-          } else {
-            t.rotation = Math.PI / 2;
-          }
-        }
-      })
+  if (rotateStart && textContainer) {
+    if (!going) {
+      _t -= speed;
     }
+    textContainer.children.forEach(function (item, index) {
+      var n;
+      if (- _t >= item.gameStep * mt + item.startStemp + mt / 2) {
+        item.gameStep += 1 
+      } else if (-_t < item.gameStep * mt + item.startStemp - mt / 2 && 0 < item.gameStep) {
+        item.gameStep -= 1
+      }
+      if ((n = _t + item.gameStep * mt) <= -item.startStemp && n + item.startStemp > -Math.PI - item.allRotation) {
+        item.rotation = Math.PI / 2 + (n + item.startStemp)
+      } else if (n + item.startStemp <= -Math.PI - item.allRotation) {
+        item.rotation = -Math.PI - item.allRotation
+      } else {
+        item.rotation = Math.PI / 2
+      }
+    })
     CanvasRenderer.render(Stage);
   }
   TWEEN.update();
